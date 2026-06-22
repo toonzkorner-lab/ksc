@@ -21,18 +21,23 @@ export default function Navbar() {
   useEffect(() => {
     setIsOpen(false);
     setServicesOpen(false);
+    setMobileServicesOpen(false);
   }, [location]);
 
   return (
     <nav className={`navbar ${scrolled ? 'navbar-scrolled' : ''}`}>
       <div className="container navbar-container">
-        <Link to="/" className="navbar-logo">
-          KING<span>SERVICES</span>
+        <Link to="/" className="navbar-logo" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+          <img 
+            src="https://landing-page-app-hero-images.s3.amazonaws.com/media/22590a0f-31d5-4ed2-a174-356524fe1863.jpeg" 
+            alt="King Services Concrete Logo" 
+            style={{ maxHeight: '50px', width: 'auto', borderRadius: '4px' }} 
+          />
         </Link>
 
         {/* Desktop Nav */}
         <div className="navbar-desktop">
-          <Link to="/" className="nav-link">Home</Link>
+          <Link to="/" className="nav-link" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>Home</Link>
           
           <div 
             className="nav-dropdown"
@@ -40,19 +45,25 @@ export default function Navbar() {
             onMouseLeave={() => setServicesOpen(false)}
           >
             <button 
-              className="nav-link nav-dropdown-btn"
-              onClick={() => setServicesOpen(!servicesOpen)}
+              className="nav-link dropdown-btn"
+              onClick={() => {
+                setServicesOpen(!servicesOpen);
+              }}
             >
               Services <ChevronDown size={16} />
             </button>
             
-            <div className={`dropdown-menu glass ${servicesOpen ? 'dropdown-open' : ''}`}>
-              <div className="dropdown-content">
+            <div className={`dropdown-menu ${servicesOpen ? 'dropdown-open' : ''}`}>
+              <div className="dropdown-content glass">
                 {services.map(service => (
                   <Link 
                     key={service.id} 
-                    to={service.path}
+                    to={service.path} 
                     className="dropdown-item"
+                    onClick={() => {
+                      setServicesOpen(false);
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
                   >
                     {service.title}
                   </Link>
@@ -61,9 +72,9 @@ export default function Navbar() {
             </div>
           </div>
 
-          <Link to="/about" className="nav-link">About</Link>
-          <Link to="/galleries" className="nav-link">Galleries</Link>
-          <Link to="/reviews" className="nav-link">Reviews</Link>
+          <Link to="/about" className="nav-link" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>About</Link>
+          <Link to="/galleries" className="nav-link" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>Galleries</Link>
+          <Link to="/reviews" className="nav-link" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>Reviews</Link>
           
           <div className="nav-cta-group ml-auto" style={{display: 'flex', gap: '0.5rem'}}>
             <a href="sms:18303966535" className="btn btn-outline">
@@ -85,26 +96,39 @@ export default function Navbar() {
       </div>
 
       {/* Mobile Nav */}
-      <div className={`navbar-mobile glass ${isOpen ? 'mobile-open' : ''}`}>
+      <div className={`navbar-mobile ${isOpen ? 'mobile-open' : ''} glass`}>
         <div className="mobile-nav-content">
-          <Link to="/" className="mobile-nav-link">Home</Link>
-          <div className="mobile-nav-dropdown">
-            <button className="mobile-nav-link dropdown-toggle" onClick={() => setServicesOpen(!servicesOpen)}>
-              Services <ChevronDown size={20} className={servicesOpen ? 'rotate-180' : ''} />
+          <Link to="/" className="mobile-nav-link" onClick={() => { setIsOpen(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
+            Home
+          </Link>
+          <div className="mobile-nav-item">
+            <button 
+              className="mobile-nav-link dropdown-toggle"
+              onClick={() => setMobileServicesOpen(!mobileServicesOpen)}
+            >
+              Services <ChevronDown size={20} className={mobileServicesOpen ? 'rotate-180' : ''} />
             </button>
-            {servicesOpen && (
+            {mobileServicesOpen && (
               <div className="mobile-dropdown-content">
                 {services.map(service => (
-                  <Link key={service.id} to={service.path} className="mobile-dropdown-item">
+                  <Link 
+                    key={service.id} 
+                    to={service.path} 
+                    className="mobile-dropdown-item"
+                    onClick={() => {
+                      setIsOpen(false);
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                  >
                     {service.title}
                   </Link>
                 ))}
               </div>
             )}
           </div>
-          <Link to="/about" className="mobile-nav-link">About</Link>
-          <Link to="/galleries" className="mobile-nav-link">Galleries</Link>
-          <Link to="/reviews" className="mobile-nav-link">Reviews</Link>
+          <Link to="/about" className="mobile-nav-link" onClick={() => { setIsOpen(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>About</Link>
+          <Link to="/galleries" className="mobile-nav-link" onClick={() => { setIsOpen(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>Galleries</Link>
+          <Link to="/reviews" className="mobile-nav-link" onClick={() => { setIsOpen(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>Reviews</Link>
           <div style={{display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '1rem'}}>
             <a href="sms:18303966535" className="btn btn-outline" style={{width: '100%'}}>Text Us Now</a>
             <a href="tel:18303966535" className="btn btn-primary" style={{width: '100%'}}>Call Us Now</a>
