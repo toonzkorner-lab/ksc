@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { db, storage } from '../../firebase';
+import { db } from '../../firebase';
 import { collection, getDocs, addDoc, deleteDoc, doc, updateDoc } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { LogOut, Plus, Edit2, Trash2, Image as ImageIcon, Upload } from 'lucide-react';
 
 export default function AdminDashboard() {
@@ -20,6 +19,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
 
   async function fetchData() {

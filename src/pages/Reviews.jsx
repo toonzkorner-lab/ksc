@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Star, Upload, Image as ImageIcon, X } from 'lucide-react';
+import { Star, Upload, X } from 'lucide-react';
 import { reviews as initialReviews } from '../data/reviews';
 import './Reviews.css';
 
