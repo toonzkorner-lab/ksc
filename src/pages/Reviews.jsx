@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Star, Upload, X } from 'lucide-react';
-import { reviews as initialReviews } from '../data/reviews';
+import { db } from '../firebase';
+import { collection, getDocs, addDoc, query, orderBy } from 'firebase/firestore';
 import './Reviews.css';
 
 export default function Reviews() {
-  const [reviewList, setReviewList] = useState(initialReviews);
+  const [reviewList, setReviewList] = useState([]);
   const [showForm, setShowForm] = useState(false);
+  const [loading, setLoading] = useState(true);
   
   // Form State
   const [name, setName] = useState('');
@@ -14,10 +16,28 @@ export default function Reviews() {
   const [hoverRating, setHoverRating] = useState(0);
   const [selectedImage, setSelectedImage] = useState(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
+    fetchReviews();
   }, []);
+
+  async function fetchReviews() {
+    setLoading(true);
+    try {
+      const q = query(collection(db, 'reviews'), orderBy('createdAt', 'desc'));
+      const querySnapshot = await getDocs(q);
+      const fetchedReviews = [];
+      querySnapshot.forEach((doc) => {
+        fetchedReviews.push({ id: doc.id, ...doc.data() });
+      });
+      setReviewList(fetchedReviews);
+    } catch (error) {
+      console.error("Error fetching reviews:", error);
+    }
+    setLoading(false);
+  }
 
   const handleImageChange = (e) => {
     if (e.target.files && e.target.files[0]) {
@@ -27,30 +47,66 @@ export default function Reviews() {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const newReview = {
-      author: name,
-      rating: rating,
-      text: text,
-      image: selectedImage
-    };
-    
-    // Prepend the new review so it appears at the top
-    setReviewList([newReview, ...reviewList]);
-    setIsSubmitted(true);
-    
-    // Reset form
-    setName('');
-    setRating(5);
-    setText('');
-    setSelectedImage(null);
-    
-    // Hide form after a few seconds
-    setTimeout(() => {
-      setShowForm(false);
-      setIsSubmitted(false);
-    }, 3000);
+    setUploading(true);
+
+    try {
+      let imageUrl = null;
+
+      // Upload image to ImgBB if one is selected
+      if (selectedImage) {
+        // Find the actual File object from the file input
+        const fileInput = document.getElementById('review-image-upload');
+        if (fileInput.files && fileInput.files[0]) {
+          const formDataUpload = new FormData();
+          formDataUpload.append('image', fileInput.files[0]);
+          
+          const response = await fetch(`https://api.imgbb.com/1/upload?key=09066887ddd518027024cc3a43b0f356`, {
+            method: 'POST',
+            body: formDataUpload
+          });
+          
+          const data = await response.json();
+          if (data.success) {
+            imageUrl = data.data.url;
+          }
+        }
+      }
+
+      const newReview = {
+        author: name,
+        rating: rating,
+        text: text,
+        image: imageUrl,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      
+      // Save to Firestore
+      await addDoc(collection(db, 'reviews'), newReview);
+      
+      // Add to local state so we don't have to refetch immediately
+      setReviewList([{ id: Date.now().toString(), ...newReview }, ...reviewList]);
+      setIsSubmitted(true);
+      
+      // Reset form
+      setName('');
+      setRating(5);
+      setText('');
+      setSelectedImage(null);
+      
+      // Hide form after a few seconds
+      setTimeout(() => {
+        setShowForm(false);
+        setIsSubmitted(false);
+      }, 3000);
+    } catch (error) {
+      console.error("Error submitting review:", error);
+      alert("There was an error submitting your review. Please try again.");
+    }
+
+    setUploading(false);
   };
 
   return (
