@@ -69,9 +69,20 @@ export default function AdminDashboard() {
       let imageUrl = editId ? items.find(i => i.id === editId)?.image : null;
 
       if (selectedFile) {
-        const fileRef = ref(storage, `${activeTab}/${Date.now()}_${selectedFile.name}`);
-        await uploadBytes(fileRef, selectedFile);
-        imageUrl = await getDownloadURL(fileRef);
+        const formDataUpload = new FormData();
+        formDataUpload.append('image', selectedFile);
+        
+        const response = await fetch(`https://api.imgbb.com/1/upload?key=09066887ddd518027024cc3a43b0f356`, {
+          method: 'POST',
+          body: formDataUpload
+        });
+        
+        const data = await response.json();
+        if (data.success) {
+          imageUrl = data.data.url;
+        } else {
+          throw new Error('Image upload failed');
+        }
       }
 
       const itemData = {
